@@ -219,11 +219,7 @@
 	if (self.head == nil) return start;
 	
 	RACSequence *rest = [RACSequence sequenceWithHeadBlock:^{
-		if (self.tail) {
-			return [self.tail foldRightWithStart:start reduce:reduce];
-		} else {
-			return start;
-		}
+		return [self.tail foldRightWithStart:start reduce:reduce];
 	} tailBlock:nil];
 	
 	return reduce(self.head, rest);

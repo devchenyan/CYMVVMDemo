@@ -80,6 +80,7 @@
 }
 
 - (instancetype)flatten {
+	__weak RACStream *stream __attribute__((unused)) = self;
 	return [[self flattenMap:^(id value) {
 		return value;
 	}] setNameWithFormat:@"[%@] -flatten", self.name];

@@ -30,8 +30,7 @@
 /// Subclasses must provide an implementation of this method.
 @property (nonatomic, strong, readonly) id head;
 
-/// All but the first object in the sequence, or nil if there are no other
-/// objects.
+/// All but the first object in the sequence, or nil if the sequence is empty.
 ///
 /// Subclasses must provide an implementation of this method.
 @property (nonatomic, strong, readonly) RACSequence *tail;

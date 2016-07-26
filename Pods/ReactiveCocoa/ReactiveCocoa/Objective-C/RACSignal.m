@@ -21,7 +21,6 @@
 #import "RACSubject.h"
 #import "RACSubscriber+Private.h"
 #import "RACTuple.h"
-#import <libkern/OSAtomic.h>
 
 @implementation RACSignal
 
@@ -108,21 +107,31 @@
 	return [[RACSignal createSignal:^(id<RACSubscriber> subscriber) {
 		RACStreamBindBlock bindingBlock = block();
 
-		__block volatile int32_t signalCount = 1;   // indicates self
+		NSMutableArray *signals = [NSMutableArray arrayWithObject:self];
 
 		RACCompoundDisposable *compoundDisposable = [RACCompoundDisposable compoundDisposable];
 
-		void (^completeSignal)(RACDisposable *) = ^(RACDisposable *finishedDisposable) {
-			if (OSAtomicDecrement32Barrier(&signalCount) == 0) {
-				[subscriber sendCompleted];
-				[compoundDisposable dispose];
-			} else {
-				[compoundDisposable removeDisposable:finishedDisposable];
+		void (^completeSignal)(RACSignal *, RACDisposable *) = ^(RACSignal *signal, RACDisposable *finishedDisposable) {
+			BOOL removeDisposable = NO;
+
+			@synchronized (signals) {
+				[signals removeObject:signal];
+
+				if (signals.count == 0) {
+					[subscriber sendCompleted];
+					[compoundDisposable dispose];
+				} else {
+					removeDisposable = YES;
+				}
 			}
+
+			if (removeDisposable) [compoundDisposable removeDisposable:finishedDisposable];
 		};
 
 		void (^addSignal)(RACSignal *) = ^(RACSignal *signal) {
-			OSAtomicIncrement32Barrier(&signalCount);
+			@synchronized (signals) {
+				[signals addObject:signal];
+			}
 
 			RACSerialDisposable *selfDisposable = [[RACSerialDisposable alloc] init];
 			[compoundDisposable addDisposable:selfDisposable];
@@ -134,7 +143,7 @@
 				[subscriber sendError:error];
 			} completed:^{
 				@autoreleasepool {
-					completeSignal(selfDisposable);
+					completeSignal(signal, selfDisposable);
 				}
 			}];
 
@@ -156,7 +165,7 @@
 					if (signal != nil) addSignal(signal);
 					if (signal == nil || stop) {
 						[selfDisposable dispose];
-						completeSignal(selfDisposable);
+						completeSignal(self, selfDisposable);
 					}
 				}
 			} error:^(NSError *error) {
@@ -164,7 +173,7 @@
 				[subscriber sendError:error];
 			} completed:^{
 				@autoreleasepool {
-					completeSignal(selfDisposable);
+					completeSignal(self, selfDisposable);
 				}
 			}];
 

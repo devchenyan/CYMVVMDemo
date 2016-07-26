@@ -5,7 +5,9 @@ target 'CYMVVMDemo' do
   # Uncomment this line if you're using Swift or would like to use dynamic frameworks
   use_frameworks!
 
-  pod 'ReactiveCocoa'
+  pod 'ReactiveCocoa', '~> 4.0.2-alpha-1'
+  pod 'AFNetworking'
+  pod 'MBProgressHUD'
   # Pods for CYMVVMDemo
 
   target 'CYMVVMDemoTests' do

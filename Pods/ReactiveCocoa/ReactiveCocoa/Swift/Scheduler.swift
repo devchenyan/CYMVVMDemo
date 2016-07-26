@@ -16,7 +16,7 @@ public protocol SchedulerType {
 	///
 	/// Optionally returns a disposable that can be used to cancel the work
 	/// before it begins.
-	func schedule(action: () -> Void) -> Disposable?
+	func schedule(action: () -> ()) -> Disposable?
 }
 
 /// A particular kind of scheduler that supports enqueuing actions at future
@@ -32,52 +32,39 @@ public protocol DateSchedulerType: SchedulerType {
 	///
 	/// Optionally returns a disposable that can be used to cancel the work
 	/// before it begins.
-	func scheduleAfter(date: NSDate, action: () -> Void) -> Disposable?
+	func scheduleAfter(date: NSDate, action: () -> ()) -> Disposable?
 
 	/// Schedules a recurring action at the given interval, beginning at the
 	/// given start time.
 	///
 	/// Optionally returns a disposable that can be used to cancel the work
 	/// before it begins.
-	func scheduleAfter(date: NSDate, repeatingEvery: NSTimeInterval, withLeeway: NSTimeInterval, action: () -> Void) -> Disposable?
+	func scheduleAfter(date: NSDate, repeatingEvery: NSTimeInterval, withLeeway: NSTimeInterval, action: () -> ()) -> Disposable?
 }
 
 /// A scheduler that performs all work synchronously.
 public final class ImmediateScheduler: SchedulerType {
 	public init() {}
 
-	public func schedule(action: () -> Void) -> Disposable? {
+	public func schedule(action: () -> ()) -> Disposable? {
 		action()
 		return nil
 	}
 }
 
-/// A scheduler that performs all work on the main queue, as soon as possible.
+/// A scheduler that performs all work on the main thread, as soon as possible.
 ///
-/// If the caller is already running on the main queue when an action is
+/// If the caller is already running on the main thread when an action is
 /// scheduled, it may be run synchronously. However, ordering between actions
 /// will always be preserved.
 public final class UIScheduler: SchedulerType {
-	private static var dispatchOnceToken: dispatch_once_t = 0
-	private static var dispatchSpecificKey: UInt8 = 0
-	private static var dispatchSpecificContext: UInt8 = 0
-
 	private var queueLength: Int32 = 0
 
-	public init() {
-		dispatch_once(&UIScheduler.dispatchOnceToken) {
-			dispatch_queue_set_specific(
-				dispatch_get_main_queue(),
-				&UIScheduler.dispatchSpecificKey,
-				&UIScheduler.dispatchSpecificContext,
-				nil
-			)
-		}
-	}
+	public init() {}
 
-	public func schedule(action: () -> Void) -> Disposable? {
+	public func schedule(action: () -> ()) -> Disposable? {
 		let disposable = SimpleDisposable()
-		let actionAndDecrement = {
+		let actionAndDecrement: () -> () = {
 			if !disposable.disposed {
 				action()
 			}
@@ -87,9 +74,9 @@ public final class UIScheduler: SchedulerType {
 
 		let queued = OSAtomicIncrement32(&queueLength)
 
-		// If we're already running on the main queue, and there isn't work
+		// If we're already running on the main thread, and there isn't work
 		// already enqueued, we can skip scheduling and just execute directly.
-		if queued == 1 && dispatch_get_specific(&UIScheduler.dispatchSpecificKey) == &UIScheduler.dispatchSpecificContext {
+		if NSThread.isMainThread() && queued == 1 {
 			actionAndDecrement()
 		} else {
 			dispatch_async(dispatch_get_main_queue(), actionAndDecrement)
@@ -131,14 +118,14 @@ public final class QueueScheduler: DateSchedulerType {
 		return NSDate()
 	}
 
-	/// Initializes a scheduler that will target a new serial
-	/// queue with the given quality of service class.
+	/// Initializes a scheduler that will target the global queue with the given
+	/// quality of service class.
 	@available(iOS 8, watchOS 2, OSX 10.10, *)
 	public convenience init(qos: dispatch_qos_class_t = QOS_CLASS_DEFAULT, name: String = "org.reactivecocoa.ReactiveCocoa.QueueScheduler") {
 		self.init(internalQueue: dispatch_queue_create(name, dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL, qos, 0)))
 	}
 
-	public func schedule(action: () -> Void) -> Disposable? {
+	public func schedule(action: () -> ()) -> Disposable? {
 		let d = SimpleDisposable()
 
 		dispatch_async(queue) {
@@ -160,7 +147,7 @@ public final class QueueScheduler: DateSchedulerType {
 		return dispatch_walltime(&walltime, 0)
 	}
 
-	public func scheduleAfter(date: NSDate, action: () -> Void) -> Disposable? {
+	public func scheduleAfter(date: NSDate, action: () -> ()) -> Disposable? {
 		let d = SimpleDisposable()
 
 		dispatch_after(wallTimeWithDate(date), queue) {
@@ -177,13 +164,13 @@ public final class QueueScheduler: DateSchedulerType {
 	///
 	/// Optionally returns a disposable that can be used to cancel the work
 	/// before it begins.
-	public func scheduleAfter(date: NSDate, repeatingEvery: NSTimeInterval, action: () -> Void) -> Disposable? {
+	public func scheduleAfter(date: NSDate, repeatingEvery: NSTimeInterval, action: () -> ()) -> Disposable? {
 		// Apple's "Power Efficiency Guide for Mac Apps" recommends a leeway of
 		// at least 10% of the timer interval.
 		return scheduleAfter(date, repeatingEvery: repeatingEvery, withLeeway: repeatingEvery * 0.1, action: action)
 	}
 
-	public func scheduleAfter(date: NSDate, repeatingEvery: NSTimeInterval, withLeeway leeway: NSTimeInterval, action: () -> Void) -> Disposable? {
+	public func scheduleAfter(date: NSDate, repeatingEvery: NSTimeInterval, withLeeway leeway: NSTimeInterval, action: () -> ()) -> Disposable? {
 		precondition(repeatingEvery >= 0)
 		precondition(leeway >= 0)
 
@@ -205,9 +192,9 @@ public final class QueueScheduler: DateSchedulerType {
 public final class TestScheduler: DateSchedulerType {
 	private final class ScheduledAction {
 		let date: NSDate
-		let action: () -> Void
+		let action: () -> ()
 
-		init(date: NSDate, action: () -> Void) {
+		init(date: NSDate, action: () -> ()) {
 			self.date = date
 			self.action = action
 		}
@@ -252,7 +239,7 @@ public final class TestScheduler: DateSchedulerType {
 		}
 	}
 
-	public func schedule(action: () -> Void) -> Disposable? {
+	public func schedule(action: () -> ()) -> Disposable? {
 		return schedule(ScheduledAction(date: currentDate, action: action))
 	}
 
@@ -261,15 +248,15 @@ public final class TestScheduler: DateSchedulerType {
 	///
 	/// Optionally returns a disposable that can be used to cancel the work
 	/// before it begins.
-	public func scheduleAfter(interval: NSTimeInterval, action: () -> Void) -> Disposable? {
+	public func scheduleAfter(interval: NSTimeInterval, action: () -> ()) -> Disposable? {
 		return scheduleAfter(currentDate.dateByAddingTimeInterval(interval), action: action)
 	}
 
-	public func scheduleAfter(date: NSDate, action: () -> Void) -> Disposable? {
+	public func scheduleAfter(date: NSDate, action: () -> ()) -> Disposable? {
 		return schedule(ScheduledAction(date: date, action: action))
 	}
 
-	private func scheduleAfter(date: NSDate, repeatingEvery: NSTimeInterval, disposable: SerialDisposable, action: () -> Void) {
+	private func scheduleAfter(date: NSDate, repeatingEvery: NSTimeInterval, disposable: SerialDisposable, action: () -> ()) {
 		precondition(repeatingEvery >= 0)
 
 		disposable.innerDisposable = scheduleAfter(date) { [unowned self] in
@@ -283,11 +270,11 @@ public final class TestScheduler: DateSchedulerType {
 	///
 	/// Optionally returns a disposable that can be used to cancel the work
 	/// before it begins.
-	public func scheduleAfter(interval: NSTimeInterval, repeatingEvery: NSTimeInterval, withLeeway leeway: NSTimeInterval = 0, action: () -> Void) -> Disposable? {
+	public func scheduleAfter(interval: NSTimeInterval, repeatingEvery: NSTimeInterval, withLeeway leeway: NSTimeInterval = 0, action: () -> ()) -> Disposable? {
 		return scheduleAfter(currentDate.dateByAddingTimeInterval(interval), repeatingEvery: repeatingEvery, withLeeway: leeway, action: action)
 	}
 
-	public func scheduleAfter(date: NSDate, repeatingEvery: NSTimeInterval, withLeeway: NSTimeInterval = 0, action: () -> Void) -> Disposable? {
+	public func scheduleAfter(date: NSDate, repeatingEvery: NSTimeInterval, withLeeway: NSTimeInterval = 0, action: () -> ()) -> Disposable? {
 		let disposable = SerialDisposable()
 		scheduleAfter(date, repeatingEvery: repeatingEvery, disposable: disposable, action: action)
 		return disposable
@@ -316,19 +303,17 @@ public final class TestScheduler: DateSchedulerType {
 		lock.lock()
 
 		assert(currentDate.compare(newDate) != .OrderedDescending)
+		_currentDate = newDate
 
 		while scheduledActions.count > 0 {
 			if newDate.compare(scheduledActions[0].date) == .OrderedAscending {
 				break
 			}
 
-			_currentDate = scheduledActions[0].date
-
-			let scheduledAction = scheduledActions.removeAtIndex(0)
+			let scheduledAction = scheduledActions[0]
+			scheduledActions.removeAtIndex(0)
 			scheduledAction.action()
 		}
-
-		_currentDate = newDate
 
 		lock.unlock()
 	}
