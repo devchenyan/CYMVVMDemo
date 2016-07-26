@@ -1,0 +1,6 @@
+framework module Pods_CYMVVMDemo {
+  umbrella header "Pods-CYMVVMDemo-umbrella.h"
+
+  export *
+  module * { export * }
+}

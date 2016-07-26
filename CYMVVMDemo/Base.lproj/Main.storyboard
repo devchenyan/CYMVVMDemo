@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10116" systemVersion="15E65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="ViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
+                        <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="pFR-Ar-QE3">
+                                <rect key="frame" x="200" y="213" width="200" height="30"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="200" id="U8T-9J-dKq"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="lxi-uC-0jb">
+                                <rect key="frame" x="200.5" y="331" width="200" height="30"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="用户名：" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rkU-AI-bdd">
+                                <rect key="frame" x="266" y="160" width="68" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="密码：" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ASm-mB-q0M">
+                                <rect key="frame" x="275" y="281" width="51" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RLx-Fx-0mC">
+                                <rect key="frame" x="285" y="390" width="30" height="30"/>
+                                <state key="normal" title="登录"/>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="lxi-uC-0jb" firstAttribute="top" secondItem="ASm-mB-q0M" secondAttribute="bottom" constant="29" id="1bN-9P-vUf"/>
+                            <constraint firstItem="lxi-uC-0jb" firstAttribute="width" secondItem="pFR-Ar-QE3" secondAttribute="width" id="6qr-Fa-0kl"/>
+                            <constraint firstItem="rkU-AI-bdd" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="140" id="C9x-ov-Mjq"/>
+                            <constraint firstItem="RLx-Fx-0mC" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="KG4-be-FZd"/>
+                            <constraint firstItem="rkU-AI-bdd" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="140" id="WhR-O8-8jf"/>
+                            <constraint firstItem="lxi-uC-0jb" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Y0e-Ur-EFW"/>
+                            <constraint firstItem="RLx-Fx-0mC" firstAttribute="top" secondItem="lxi-uC-0jb" secondAttribute="bottom" constant="29" id="YlN-Sx-vky"/>
+                            <constraint firstItem="pFR-Ar-QE3" firstAttribute="top" secondItem="rkU-AI-bdd" secondAttribute="bottom" constant="32" id="cZM-d7-mbO"/>
+                            <constraint firstItem="rkU-AI-bdd" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="ccp-dg-0gc"/>
+                            <constraint firstItem="ASm-mB-q0M" firstAttribute="top" secondItem="pFR-Ar-QE3" secondAttribute="bottom" constant="38" id="fee-8m-VwW"/>
+                            <constraint firstItem="pFR-Ar-QE3" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="j0N-cl-in6"/>
+                            <constraint firstItem="ASm-mB-q0M" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="nu9-1E-ig6"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="accountField" destination="pFR-Ar-QE3" id="yCa-8T-cDi"/>
+                        <outlet property="loginBtn" destination="RLx-Fx-0mC" id="HZs-9c-fii"/>
+                        <outlet property="pwdField" destination="lxi-uC-0jb" id="cgV-cx-E2r"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+        </scene>
+    </scenes>
+</document>
